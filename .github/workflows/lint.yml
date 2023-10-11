@@ -1,0 +1,35 @@
+name: lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    # Only run on PRs against main
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write # Needed for GHA to write the checks for the job
+      contents: read
+    steps:
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+
+      - uses: denoland/setup-deno@61fe2df320078202e33d7d5ad347e7dcfa0e8f31 # v1.1.2
+        with:
+          deno-version: v1.37.1
+
+      - name: Cache Deno dependencies
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+        with:
+          key: denoDeps-${{ hashFiles('deno.lock') }}
+          path: ~/.cache/deno
+
+      - name: fmt
+        run: deno fmt --check
+
+      - name: lint
+        run: deno lint
