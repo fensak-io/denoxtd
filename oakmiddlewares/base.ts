@@ -3,6 +3,9 @@
 
 import { crypto, oak, winston } from "../deps.ts";
 
+/**
+ * A middleware that assigns a unique request ID to every request that comes in and sets it in the context state.
+ */
 const requestId: oak.Middleware = async (ctx: oak.Context, next: oak.Next) => {
   let requestId = ctx.request.headers.get("X-Response-Id");
   if (!requestId) {
@@ -20,6 +23,9 @@ const requestId: oak.Middleware = async (ctx: oak.Context, next: oak.Next) => {
   ctx.response.headers.set("X-Response-Id", requestId.toString());
 };
 
+/**
+ * A middleware that records how long it took to handle the request.
+ */
 const timing: oak.Middleware = async (ctx: oak.Context, next: oak.Next) => {
   const start = Date.now();
 
@@ -29,6 +35,9 @@ const timing: oak.Middleware = async (ctx: oak.Context, next: oak.Next) => {
   ctx.response.headers.set("X-Response-Time", `${ms}ms`);
 };
 
+/**
+ * A middleware that returns an error for an unsupported route.
+ */
 const unsupportedRoute: oak.Middleware = async (
   ctx: oak.Context,
   next: oak.Next,
@@ -54,6 +63,10 @@ const unsupportedRoute: oak.Middleware = async (
   }
 };
 
+/**
+ * A constructor for a new error handling middleware that returns an error response if there is an error while handling
+ * a route.
+ */
 export function newErrorMiddleware(
   projectLogger: winston.Logger,
 ): oak.Middleware {
@@ -72,6 +85,9 @@ export function newErrorMiddleware(
   };
 }
 
+/**
+ * A constructor for a logger middleware that will log metadata about each request/response cycle.
+ */
 export function newLoggerMiddleware(
   projectLogger: winston.Logger,
 ): oak.Middleware {
