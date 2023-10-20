@@ -94,6 +94,15 @@ export function newLoggerMiddleware(
   return async (ctx: oak.Context, next: oak.Next) => {
     await next();
 
+    // We strip the get parameter values for security reasons. We make a copy with all the keys filled so we can see
+    // what keys were used in the request.
+    const u = ctx.request.url;
+    const qp = new URLSearchParams();
+    for (const k of u.searchParams.keys()) {
+      qp.set(k, "***");
+    }
+    u.search = qp.toString();
+
     const reqID = ctx.response.headers.get("X-Response-Id");
     const respTime = ctx.response.headers.get("X-Response-Time");
     const status = ctx.response.status;
@@ -101,7 +110,7 @@ export function newLoggerMiddleware(
       level: "info",
       message: "serviced request",
       requestID: reqID,
-      url: ctx.request.url,
+      url: u,
       method: ctx.request.method,
       responseStatus: status,
       responseTime: respTime,
